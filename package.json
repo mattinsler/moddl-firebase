@@ -1,0 +1,38 @@
+{
+  "name": "moddl-firebase",
+  "description": "Firebase pseudo-models for moddl",
+  "version": "0.0.1",
+  "homepage": "https://github.com/mattinsler/moddl-firebase",
+  "author": {
+    "name": "Matt Insler",
+    "email": "matt.insler@gmail.com",
+    "url": "http://www.mattinsler.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mattinsler/moddl-firebase.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mattinsler/moddl-firebase/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/mattinsler/moddl-firebase/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "dist/moddl-firebase",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "dependencies": {
+    "firebase": "~0.6.22"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "moddl": "0.0.1"
+  },
+  "keywords": ["moddl", "firebase"]
+}
