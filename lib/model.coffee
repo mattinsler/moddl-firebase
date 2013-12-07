@@ -1,7 +1,5 @@
 Firebase = require 'firebase'
 
-INDEX_PREFIX = '--idx--'
-
 module.exports = (moddl) ->
   {q, Model} = moddl
   {EventEmitter} = require 'events'
@@ -14,6 +12,9 @@ module.exports = (moddl) ->
           res[k] = v
     ).then ->
       res
+  
+  get_index_root = (root, model) ->
+    root.root().child('--idx--/' + model.options.root)
   
   class Model.Firebase extends Model
     constructor: ->
@@ -54,7 +55,7 @@ module.exports = (moddl) ->
       return false if @options.index.length is 0
       
       @__root__.then (root) =>
-        index_root = root.root().child(INDEX_PREFIX)
+        index_root = get_index_root(root, @)
         
         exists = false
         q.all(
@@ -86,7 +87,7 @@ module.exports = (moddl) ->
         
         @__root__
       .then (root) =>
-        index_root = root.root().child(INDEX_PREFIX)
+        index_root = get_index_root(root, @)
         
         id = root.push(obj).name()
         q.all(
@@ -103,7 +104,7 @@ module.exports = (moddl) ->
       throw new Error("There is no index for '#{keys[0]}', cannot query without an index") unless keys[0] in @options.index
       
       @__root__.then (root) =>
-        index_root = root.root().child(INDEX_PREFIX)
+        index_root = get_index_root(root, @)
         
         d = q.defer()
         
@@ -131,7 +132,7 @@ module.exports = (moddl) ->
       .then (data) =>
         return unless data.obj.val()?
         
-        index_root = data.root.root().child(INDEX_PREFIX)
+        index_root = get_index_root(data.root, @)
         
         q.all(
           [

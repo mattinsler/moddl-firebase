@@ -1,5 +1,5 @@
 (function() {
-  var Firebase, INDEX_PREFIX,
+  var Firebase,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __slice = [].slice,
@@ -7,10 +7,8 @@
 
   Firebase = require('firebase');
 
-  INDEX_PREFIX = '--idx--';
-
   module.exports = function(moddl) {
-    var EventEmitter, Model, parallel, q;
+    var EventEmitter, Model, get_index_root, parallel, q;
     q = moddl.q, Model = moddl.Model;
     EventEmitter = require('events').EventEmitter;
     parallel = function(obj) {
@@ -23,6 +21,9 @@
       })).then(function() {
         return res;
       });
+    };
+    get_index_root = function(root, model) {
+      return root.root().child('--idx--/' + model.options.root);
     };
     return Model.Firebase = (function(_super) {
       __extends(Firebase, _super);
@@ -95,7 +96,7 @@
         }
         return this.__root__.then(function(root) {
           var exists, index_root;
-          index_root = root.root().child(INDEX_PREFIX);
+          index_root = get_index_root(root, _this);
           exists = false;
           return q.all(_this.options.index.map(function(idx) {
             var d, idx_key;
@@ -142,7 +143,7 @@
           return _this.__root__;
         }).then(function(root) {
           var id, index_root;
-          index_root = root.root().child(INDEX_PREFIX);
+          index_root = get_index_root(root, _this);
           id = root.push(obj).name();
           return q.all(_this.options.index.map(function(idx) {
             return q.ninvoke(index_root.child(_this.fix_key(idx + '/' + obj[idx])), 'set', id);
@@ -167,7 +168,7 @@
         }
         return this.__root__.then(function(root) {
           var d, index_root;
-          index_root = root.root().child(INDEX_PREFIX);
+          index_root = get_index_root(root, _this);
           d = q.defer();
           index_root.child(_this.fix_key(keys[0] + '/' + query[keys[0]])).once('value', function(ref) {
             return d.resolve(ref);
@@ -204,7 +205,7 @@
           if (data.obj.val() == null) {
             return;
           }
-          index_root = data.root.root().child(INDEX_PREFIX);
+          index_root = get_index_root(data.root, _this);
           return q.all([q.ninvoke(data.root.child(data.obj.name()), 'remove')].concat(_this.options.index.map(function(idx) {
             var idx_key;
             idx_key = _this.fix_key(idx + '/' + data.obj.val()[idx]);
