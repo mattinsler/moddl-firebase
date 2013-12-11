@@ -41,15 +41,16 @@ module.exports = (moddl) ->
     @connect: (url) ->
       Model.Firebase.provider.connect(name: 'DEFAULT', url: url)
     
+    @escape_string: (str) ->
+      str.split('').map (c) ->
+        return '%' + Buffer([c.charCodeAt(0)]).toString('hex') if c[0] in ['.', '$', '[', ']', '#', '/']
+        c[0]
+      .join('')
+    
     @fix_key: (key) ->
-      a = key.split('/').map (k) ->
-        k.split('').map (c) ->
-          return '%' + Buffer([c.charCodeAt(0)]).toString('hex') if c[0] in ['.', '$', '[', ']', '#', '/']
-          c[0]
-        .join('')
+      key.split('/').map (k) =>
+        @escape_string(k)
       .join('/')
-      
-      a
     
     @exists: Model.defer (obj) ->
       return false if @options.index.length is 0
@@ -60,7 +61,7 @@ module.exports = (moddl) ->
         exists = false
         q.all(
           @options.index.map (idx) =>
-            idx_key = @fix_key(idx + '/' + obj[idx])
+            idx_key = @escape_string(idx) + '/' + @escape_string(obj[idx])
             
             d = q.defer()
             index_root.child(idx_key).once 'value', (s) ->
@@ -92,7 +93,7 @@ module.exports = (moddl) ->
         id = root.push(obj).name()
         q.all(
           @options.index.map (idx) =>
-            q.ninvoke(index_root.child(@fix_key(idx + '/' + obj[idx])), 'set', id)
+            q.ninvoke(index_root.child(@escape_string(idx) + '/' + @escape_string(obj[idx])), 'set', id)
         )
         .then ->
           root.child(id)
@@ -108,7 +109,7 @@ module.exports = (moddl) ->
         
         d = q.defer()
         
-        index_root.child(@fix_key(keys[0] + '/' + query[keys[0]])).once 'value', (ref) ->
+        index_root.child(@escape_string(keys[0]) + '/' + @escape_string(query[keys[0]])).once 'value', (ref) ->
           d.resolve(ref)
         
         d.promise
@@ -139,7 +140,7 @@ module.exports = (moddl) ->
             q.ninvoke(data.root.child(data.obj.name()), 'remove')
           ].concat(
             @options.index.map (idx) =>
-              idx_key = @fix_key(idx + '/' + data.obj.val()[idx])
+              idx_key = @escape_string(idx) + '/' + @escape_string(data.obj.val()[idx])
               q.ninvoke(index_root.child(idx_key), 'remove')
           )
         )

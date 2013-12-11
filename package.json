@@ -1,7 +1,7 @@
 {
   "name": "moddl-firebase",
   "description": "Firebase pseudo-models for moddl",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/mattinsler/moddl-firebase",
   "author": {
     "name": "Matt Insler",

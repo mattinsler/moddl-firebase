@@ -75,18 +75,21 @@
         });
       };
 
+      Firebase.escape_string = function(str) {
+        return str.split('').map(function(c) {
+          var _ref;
+          if ((_ref = c[0]) === '.' || _ref === '$' || _ref === '[' || _ref === ']' || _ref === '#' || _ref === '/') {
+            return '%' + Buffer([c.charCodeAt(0)]).toString('hex');
+          }
+          return c[0];
+        }).join('');
+      };
+
       Firebase.fix_key = function(key) {
-        var a;
-        a = key.split('/').map(function(k) {
-          return k.split('').map(function(c) {
-            var _ref;
-            if ((_ref = c[0]) === '.' || _ref === '$' || _ref === '[' || _ref === ']' || _ref === '#' || _ref === '/') {
-              return '%' + Buffer([c.charCodeAt(0)]).toString('hex');
-            }
-            return c[0];
-          }).join('');
+        var _this = this;
+        return key.split('/').map(function(k) {
+          return _this.escape_string(k);
         }).join('/');
-        return a;
       };
 
       Firebase.exists = Model.defer(function(obj) {
@@ -100,7 +103,7 @@
           exists = false;
           return q.all(_this.options.index.map(function(idx) {
             var d, idx_key;
-            idx_key = _this.fix_key(idx + '/' + obj[idx]);
+            idx_key = _this.escape_string(idx) + '/' + _this.escape_string(obj[idx]);
             d = q.defer();
             index_root.child(idx_key).once('value', function(s) {
               if (s.val() != null) {
@@ -146,7 +149,7 @@
           index_root = get_index_root(root, _this);
           id = root.push(obj).name();
           return q.all(_this.options.index.map(function(idx) {
-            return q.ninvoke(index_root.child(_this.fix_key(idx + '/' + obj[idx])), 'set', id);
+            return q.ninvoke(index_root.child(_this.escape_string(idx) + '/' + _this.escape_string(obj[idx])), 'set', id);
           })).then(function() {
             return root.child(id);
           });
@@ -170,7 +173,7 @@
           var d, index_root;
           index_root = get_index_root(root, _this);
           d = q.defer();
-          index_root.child(_this.fix_key(keys[0] + '/' + query[keys[0]])).once('value', function(ref) {
+          index_root.child(_this.escape_string(keys[0]) + '/' + _this.escape_string(query[keys[0]])).once('value', function(ref) {
             return d.resolve(ref);
           });
           return d.promise;
@@ -208,7 +211,7 @@
           index_root = get_index_root(data.root, _this);
           return q.all([q.ninvoke(data.root.child(data.obj.name()), 'remove')].concat(_this.options.index.map(function(idx) {
             var idx_key;
-            idx_key = _this.fix_key(idx + '/' + data.obj.val()[idx]);
+            idx_key = _this.escape_string(idx) + '/' + _this.escape_string(data.obj.val()[idx]);
             return q.ninvoke(index_root.child(idx_key), 'remove');
           }))).then(function() {
             return data.obj;
