@@ -1,7 +1,7 @@
 (function() {
   var Firebase;
 
-  Firebase = require('firebase');
+  Firebase = require('./moddl-firebase').Firebase;
 
   module.exports = function(moddl) {
     var EventEmitter, Provider, q;

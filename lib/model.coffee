@@ -1,4 +1,4 @@
-Firebase = require 'firebase'
+{Firebase} = require './moddl-firebase'
 
 module.exports = (moddl) ->
   {q, Model} = moddl
