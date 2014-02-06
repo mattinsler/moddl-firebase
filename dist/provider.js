@@ -20,31 +20,31 @@
       });
     };
     Provider.connect = function(opts) {
-      var auth, base, d, finish;
+      var auth, base, d, finish, parsed;
       if (opts.name == null) {
-        if (typeof opts.url === 'string') {
-          opts.name = opts.url;
-        } else {
-          opts.name = moddl.betturl.format(opts.url);
-        }
+        opts.name = opts.url;
       }
+      opts.name = opts.name.toLowerCase();
       if (Provider.cache.connected[opts.name] != null) {
         return q(Provider.cache.connected[opts.name]);
       }
       if (Provider.cache.connecting[opts.name] != null) {
         return Provider.cache.connecting[opts.name];
       }
-      auth = opts.url.auth;
-      delete opts.url.auth;
       d = q.defer();
-      if ((opts.name != null) && (opts.url == null)) {
+      if (opts.url == null) {
         Provider.on('connect:' + opts.name, function() {
           return d.resolve(Provider.cache.connected[opts.name]);
         });
         return d.promise;
       }
+      if (opts.url != null) {
+        parsed = moddl.betturl.parse(opts.url);
+      }
+      auth = parsed.auth;
+      delete parsed.auth;
       Provider.cache.connecting[opts.name] = d.promise;
-      base = new Firebase(moddl.betturl.format(opts.url));
+      base = new Firebase(moddl.betturl.format(parsed));
       finish = function(err) {
         delete Provider.cache.connecting[opts.name];
         if (err != null) {

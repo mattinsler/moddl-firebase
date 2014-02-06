@@ -37,9 +37,15 @@ module.exports = (moddl) ->
   
     @load: (instance, data) ->
       instance[k] = v for k, v of data
-  
-    @connect: (url) ->
-      Model.Firebase.provider.connect(name: 'DEFAULT', url: url)
+    
+    # {
+    #   url: 'https://:password@foo.firebaseIO.com'
+    # }
+    @connect: (config) ->
+      config = {url: config} if typeof config is 'string'
+      config.name ?= 'default'
+      
+      Model.Firebase.provider.connect(config)
     
     @escape_string: (str) ->
       str.split('').map (c) ->

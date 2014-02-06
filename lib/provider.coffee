@@ -16,28 +16,27 @@ module.exports = (moddl) ->
       conn.child(root)
   
   Provider.connect = (opts) ->
-    unless opts.name?
-      if typeof opts.url is 'string'
-        opts.name = opts.url
-      else
-        opts.name = moddl.betturl.format(opts.url)
+    opts.name ?= opts.url
+    opts.name = opts.name.toLowerCase()
     
     return q(Provider.cache.connected[opts.name]) if Provider.cache.connected[opts.name]?
     return Provider.cache.connecting[opts.name] if Provider.cache.connecting[opts.name]?
     
-    auth = opts.url.auth
-    delete opts.url.auth
-    
     d = q.defer()
     
-    if opts.name? and not opts.url?
+    unless opts.url?
       Provider.on 'connect:' + opts.name, ->
         d.resolve(Provider.cache.connected[opts.name])
       return d.promise
-
+    
+    parsed = moddl.betturl.parse(opts.url) if opts.url?
+    
+    auth = parsed.auth
+    delete parsed.auth
+    
     Provider.cache.connecting[opts.name] = d.promise
     
-    base = new Firebase(moddl.betturl.format(opts.url))
+    base = new Firebase(moddl.betturl.format(parsed))
     finish = (err) ->
       delete Provider.cache.connecting[opts.name]
       return d.reject(err) if err?

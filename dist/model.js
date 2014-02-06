@@ -68,11 +68,16 @@
         return _results;
       };
 
-      Firebase.connect = function(url) {
-        return Model.Firebase.provider.connect({
-          name: 'DEFAULT',
-          url: url
-        });
+      Firebase.connect = function(config) {
+        if (typeof config === 'string') {
+          config = {
+            url: config
+          };
+        }
+        if (config.name == null) {
+          config.name = 'default';
+        }
+        return Model.Firebase.provider.connect(config);
       };
 
       Firebase.escape_string = function(str) {
